@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .video-background {
+            position: fixed; /* Ensures video stays fixed in the background */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Keeps the video behind the content */
+        }
+
+        #background-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .App {
+            position: relative; /* Ensures this container is on top of the video */
+            z-index: 1; /* Places content above the video */
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(193, 193, 193, 0.162); /* Slightly transparent white background */
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-top: 180px;
+
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #dddddd72;
+            border-radius: 50px;
+            font-size: 16px;
+        }
+
+        .search-button {
+            padding: 10px 20px;
+            background-color: #000;
+            color: rgba(255, 255, 255, 0.403);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .search-button:hover {
+            background-color: #555;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin: 10px 0;
+        }
+
+        .weather-details {
+            padding: 20px;
+            background-color: rgba(83, 93, 109, 0.181);
+            border-radius: 20px;
+        
+        }
+
+        .weather-details h1 {
+            color: #000;
+            margin-bottom: 15px;
+        }
+
+        .weather-details p {
+            margin: 10px 0;
+            font-size: 25px;
+        }
+
+        .weather-details img {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-background">
+        <video autoplay muted loop id="background-video">
+            <source src="https://cdn.pixabay.com/video/2017/06/11/9825-221185540_large.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="App">
+        <h1>Weather App</h1>
+        <form class="search-form" id="searchForm">
+            <input 
+                type="text" 
+                placeholder="Enter city name" 
+                class="search-input" 
+                id="cityInput"
+                value="Ranchi"
+            >
+            <button type="submit" class="search-button">Search</button>
+        </form>
+
+        <p id="loadingMessage" style="display: none;">Loading...</p>
+        <p id="errorMessage" class="error-message" style="display: none;"></p>
+        <div id="weatherDetails" class="weather-details" style="display: none;"></div>
+    </div>
+
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const cityInput = document.getElementById('cityInput');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const weatherDetails = document.getElementById('weatherDetails');
+        
+        async function fetchWeather(city) {
+            try {
+                loadingMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
+                weatherDetails.style.display = 'none';
+
+                const response = await fetch(
+                    `http://api.weatherapi.com/v1/current.json?key=f7a6ef5289434ff69f275442240912&q=${city}&aqi=no`
+                );
+                if (!response.ok) {
+                    throw new Error('Failed to fetch weather data');
+                }
+                const data = await response.json();
+                displayWeather(data);
+            } catch (err) {
+                errorMessage.textContent = 'Failed to fetch weather data. Please check the city name.';
+                errorMessage.style.display = 'block';
+            } finally {
+                loadingMessage.style.display = 'none';
+            }
+        }
+
+        function displayWeather(weather) {
+            weatherDetails.innerHTML = `
+                <h1>${weather.location.name}, ${weather.location.country}</h1>
+                <p><strong>Temperature:</strong> ${weather.current.temp_c}°C</p>
+                <p><strong>Condition:</strong> ${weather.current.condition.text}</p>
+                <img src="${weather.current.condition.icon}" alt="Weather Icon">
+                <p><strong>Humidity:</strong> ${weather.current.humidity}%</p>
+                <p><strong>Wind Speed:</strong> ${weather.current.wind_kph} km/h</p>
+            `;
+            weatherDetails.style.display = 'block';
+        }
+
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const city = cityInput.value.trim();
+            if (city) {
+                fetchWeather(city);
+            }
+        });
+
+        // Initial weather fetch for Ranchi
+        fetchWeather('Ranchi');
+    </script>
+</body>
+</html>
