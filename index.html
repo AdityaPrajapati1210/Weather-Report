@@ -149,7 +149,7 @@
                 weatherDetails.style.display = 'none';
 
                 const response = await fetch(
-                    `http://api.weatherapi.com/v1/current.json?key=f7a6ef5289434ff69f275442240912&q=${city}&aqi=no`
+                    `https://api.weatherapi.com/v1/current.json?key=f7a6ef5289434ff69f275442240912&q=${city}&aqi=no`
                 );
                 if (!response.ok) {
                     throw new Error('Failed to fetch weather data');
